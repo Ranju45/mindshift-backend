@@ -53,6 +53,11 @@ public class AnthropicClientService {
                 "messages", messages
             );
 
+System.out.println("========== ANTHROPIC DEBUG ==========");
+System.out.println("API KEY = " + apiKey);
+System.out.println("MODEL = " + model);
+System.out.println("MAX TOKENS = " + maxTokens);
+System.out.println("=====================================");
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
             Map<String, Object> response = restTemplate.postForObject(ENDPOINT, entity, Map.class);
 
@@ -60,8 +65,9 @@ public class AnthropicClientService {
             List<Map<String, Object>> content = (List<Map<String, Object>>) response.get("content");
             if (content == null || content.isEmpty()) return FALLBACK;
             return (String) content.get(0).get("text");
-        } catch (Exception e) {
-            return FALLBACK;
-        }
+        }catch (Exception e) {
+    e.printStackTrace();
+    return "ERROR: " + e.getMessage();
+}
     }
 }
