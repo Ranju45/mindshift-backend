@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 
 @Configuration
-public class AnthropicConfig {
+public class GroqConfig {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-public class AnthropicConfig {
+public class GroqConfig {
 
     @Bean
     public RestTemplate restTemplate() {

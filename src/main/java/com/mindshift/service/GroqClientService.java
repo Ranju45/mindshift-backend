@@ -16,25 +16,25 @@ import java.util.Map;
  * never leaks into business logic.
  */
 @Service
-public class AnthropicClientService {
+public class GroqClientService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${app.anthropic.api-key}")
+    @Value("${app.groq.api-key}")
     private String apiKey;
 
-    @Value("${app.anthropic.model}")
+    @Value("${app.groq.model}")
     private String model;
 
-    @Value("${app.anthropic.max-tokens}")
+    @Value("${app.groq.max-tokens}")
     private int maxTokens;
 
-    private static final String ENDPOINT = "https://api.anthropic.com/v1/messages";
+    private static final String ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
     private static final String FALLBACK =
         "Try this right now: take one deep breath, hold for 4 seconds, exhale for 6. "
       + "Then tell me exactly what's going on - I want to give you the right technique.";
 
-    public AnthropicClientService(RestTemplate restTemplate) {
+    public GroqClientService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -43,17 +43,33 @@ public class AnthropicClientService {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("x-api-key", apiKey);
-            headers.set("anthropic-version", "2023-06-01");
+            headers.setBearerAuth(apiKey);
 
-            Map<String, Object> body = Map.of(
+         /*   Map<String, Object> body = Map.of(
                 "model", model,
                 "max_tokens", maxTokens,
                 "system", systemPrompt,
                 "messages", messages
+            );*/
+            List<Map<String, String>> groqMessages = List.of(
+                    Map.of(
+                            "role", "system",
+                            "content", systemPrompt
+                    ),
+                    Map.of(
+                            "role", "user",
+                            "content", messages.get(messages.size() - 1).get("content")
+                    )
             );
 
-System.out.println("========== ANTHROPIC DEBUG ==========");
+            Map<String, Object> body = Map.of(
+                    "model", model,
+                    "messages", groqMessages,
+                    "max_tokens", maxTokens,
+                    "temperature", 0.7
+            );
+
+            System.out.println("========== GROQ DEBUG ==========");
 System.out.println("API KEY = " + apiKey);
 System.out.println("MODEL = " + model);
 System.out.println("MAX TOKENS = " + maxTokens);
@@ -62,9 +78,19 @@ System.out.println("=====================================");
             Map<String, Object> response = restTemplate.postForObject(ENDPOINT, entity, Map.class);
 
             if (response == null) return FALLBACK;
-            List<Map<String, Object>> content = (List<Map<String, Object>>) response.get("content");
+        /*    List<Map<String, Object>> content = (List<Map<String, Object>>) response.get("content");
             if (content == null || content.isEmpty()) return FALLBACK;
-            return (String) content.get(0).get("text");
+            return (String) content.get(0).get("text");*/
+            List<Map<String, Object>> choices =
+                    (List<Map<String, Object>>) response.get("choices");
+
+            if (choices == null || choices.isEmpty())
+                return FALLBACK;
+
+            Map<String, Object> message =
+                    (Map<String, Object>) choices.get(0).get("message");
+
+            return (String) message.get("content");
         }catch (Exception e) {
     e.printStackTrace();
     return "ERROR: " + e.getMessage();

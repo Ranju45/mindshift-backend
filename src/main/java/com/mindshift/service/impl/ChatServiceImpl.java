@@ -8,7 +8,7 @@ import com.mindshift.model.User;
 import com.mindshift.model.enums.MessageRole;
 import com.mindshift.model.enums.ThoughtCategory;
 import com.mindshift.repository.ChatMessageRepository;
-import com.mindshift.service.AnthropicClientService;
+import com.mindshift.service.GroqClientService;
 import com.mindshift.service.ChatService;
 import com.mindshift.util.classifier.PromptFactory;
 import com.mindshift.util.classifier.ThoughtClassifierStrategy;
@@ -29,7 +29,7 @@ public class ChatServiceImpl implements ChatService {
     private final ChatMessageRepository chatRepository;
     private final ThoughtClassifierStrategy classifier;
     private final PromptFactory promptFactory;
-    private final AnthropicClientService anthropicClient;
+    private final GroqClientService groqClient;
 
     @Override
     @Transactional
@@ -54,7 +54,7 @@ public class ChatServiceImpl implements ChatService {
                 .toList();
 
         String systemPrompt = promptFactory.buildSystemPrompt(user, category);
-        String reply = anthropicClient.complete(systemPrompt, apiMessages);
+        String reply = groqClient.complete(systemPrompt, apiMessages);
 
         ChatMessage aiMsg = ChatMessage.builder()
                 .user(user).role(MessageRole.ASSISTANT).content(reply).build();
