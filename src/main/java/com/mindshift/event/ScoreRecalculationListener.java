@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Subscriber side of the Observer pattern. Runs asynchronously so the
@@ -28,6 +29,7 @@ public class ScoreRecalculationListener {
     private final UserRepository userRepository;
 
     @Async
+    @Transactional
     @EventListener
     public void onScoreRecalculation(ScoreRecalculationEvent event) {
         userRepository.findById(event.getUserId()).ifPresent(user -> {

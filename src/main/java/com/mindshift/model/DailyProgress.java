@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * One row per user. Tracks the 7-day protocol cursor.
@@ -28,11 +29,11 @@ public class DailyProgress {
     @Builder.Default
     private Integer currentDay = 1;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "completed_days", joinColumns = @JoinColumn(name = "progress_id"))
     @Column(name = "day_number")
     @Builder.Default
-    private List<Integer> completedDays = List.of();
+    private List<Integer> completedDays = new ArrayList<>();
 
     @Column(nullable = false)
     @Builder.Default
